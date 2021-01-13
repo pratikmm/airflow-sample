@@ -31,21 +31,10 @@ passing = KubernetesPodOperator(namespace='default',
                           dag=dag
                           )
 
-passing2 = KubernetesPodOperator(namespace='default',
-                          image="python:3.6",
-                          cmds=["python","-c"],
-                          arguments=["print('hello world')"],
-                          labels={"foo": "bar"},
-                          name="passing-test2",
-                          task_id="passing-task2",
-                          get_logs=True,
-                          dag=dag
-                          )
 
 end = DummyOperator(task_id='end', dag=dag)
 
 
 passing.set_upstream(start)
 passing.set_downstream(end)
-passing2.set_upstream(start)
-passing2.set_downstream(end)
+
