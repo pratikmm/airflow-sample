@@ -1,41 +1,63 @@
-import airflow
 from airflow import DAG
+from datetime import datetime, timedelta
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
+from airflow.operators.dummy_operator import DummyOperator
 
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': airflow.utils.dates.days_ago(0),
+    'start_date': datetime.utcnow(),
+    'email': ['airflow@example.com'],
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5)
 }
 
-dag = DAG('sampleDAG', default_args=default_args, schedule_interval=None)
+dag = DAG(
+    'kubernetes_hello_world2', default_args=default_args, schedule_interval=timedelta(minutes=10))
 
 
-DriftTask1 = KubernetesPodOperator(
-    namespace='default',
-    image="python",
-    cmds=["python", "-c"],
-    arguments=["print('This code is running in a Kubernetes Pod')"],
-    labels={},
-    name="sampleDAG",
-    task_id="DriftTask1",
-    get_logs=True,
-    dag=dag,
-    log_events_on_failure=True,
-    is_delete_operator_pod=True)
+start = DummyOperator(task_id='start', dag=dag)
 
-DriftTask2 = KubernetesPodOperator(
-    namespace='default',
-    image="python",
-    cmds=["python", "-c"],
-    arguments=["print('This code is running in a Kubernetes Pod')"],
-    labels={},
-    name="sampleDAG",
-    task_id="DriftTask2",
-    get_logs=True,
-    dag=dag,
-    log_events_on_failure=True,
-    is_delete_operator_pod=True)
+passing = KubernetesPodOperator(namespace='default',
+                          image="python:3.6",
+                          cmds=["python","-c"],
+                          arguments=["print('hello world')"],
+                          labels={"foo": "bar"},
+                          name="passing-test",
+                          task_id="passing-task",
+                          get_logs=True,
+                          dag=dag
+                          )
 
-DriftTask1
-DriftTask2
+failing = KubernetesPodOperator(namespace='default',
+                          image="ubuntu:16.04",
+                          cmds=["python","-c"],
+                          arguments=["print('hello world')"],
+                          labels={"foo": "bar"},
+                          name="fail",
+                          task_id="failing-task",
+                          get_logs=True,
+                          dag=dag
+                          )
+
+passing2 = KubernetesPodOperator(namespace='default',
+                          image="python:3.6",
+                          cmds=["python","-c"],
+                          arguments=["print('hello world')"],
+                          labels={"foo": "bar"},
+                          name="passing-test2",
+                          task_id="passing-task2",
+                          get_logs=True,
+                          dag=dag
+                          )
+
+end = DummyOperator(task_id='end', dag=dag)
+
+
+passing.set_upstream(start)
+failing.set_upstream(passing)
+passing2.set_upstream(passing)
+passing2.set_upstream(failing)
+passing2.set_downstream(end)
