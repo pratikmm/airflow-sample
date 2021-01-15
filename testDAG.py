@@ -2,7 +2,7 @@ from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.bash import BashOperator
+#from airflow.operators.bash import BashOperator
 
 default_args = {
     'owner': 'airflow',
