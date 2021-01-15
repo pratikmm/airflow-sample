@@ -64,6 +64,7 @@ passing3 = KubernetesPodOperator(namespace='default',
                           get_logs=True,
                           dag=dag
                           )
+
 write_xcom1 = KubernetesPodOperator(
         namespace='default',
         image='alpine',
@@ -91,7 +92,8 @@ end = DummyOperator(task_id='end', dag=dag)
 #[passing1, passing2, failing1] >> passing3
 
 
-start >> passing1 >> passing2 >> passing3 >> write_xcom1 >> failing1 >> end
+start >> passing1 >> end 
+#passing2 >> passing3 >> write_xcom1 >> failing1 >> end
 
 # passing1.set_upstream(start)
 # failing1.set_upstream(passing1)
