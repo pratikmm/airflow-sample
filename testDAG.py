@@ -85,7 +85,11 @@ write_xcom1 = KubernetesPodOperator(
 end = DummyOperator(task_id='end', dag=dag)
 
 
-start >> passing1 >> [passing2, failing1] >> passing3 >> write_xcom1 >> end
+#start >> passing1 >> [passing2, failing1] >> passing3 >> write_xcom1 >> end
+
+start >> [passing1, passing2, failing1]
+[passing1, passing2, failing1] >> passing3
+passing3 >> write_xcom1 >> end
 
 # passing1.set_upstream(start)
 # failing1.set_upstream(passing1)
