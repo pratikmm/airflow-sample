@@ -21,22 +21,22 @@ dag = DAG(
 
 start = DummyOperator(task_id='start', dag=dag)
 
-passing1 = DummyOperator(task_id='passing1', dag=dag)
+#passing1 = DummyOperator(task_id='passing1', dag=dag)
 
-passing2 = DummyOperator(task_id='passing2', dag=dag)
+#passing2 = DummyOperator(task_id='passing2', dag=dag)
 
-passing3 = DummyOperator(task_id='passing3', dag=dag)
+#passing3 = DummyOperator(task_id='passing3', dag=dag)
 
-# passing1 = KubernetesPodOperator(namespace='default',
-#                           image="python:3.6",
-#                           cmds=["python","-c"],
-#                           arguments=["print('hello world')"],
-#                           labels={"foo": "bar"},
-#                           name="passing-test1",
-#                           task_id="passing-task1",
-#                           get_logs=True,
-#                           dag=dag
-#                           )
+passing1 = KubernetesPodOperator(namespace='default',
+                          image="python:3.6",
+                          cmds=["python","-c"],
+                          arguments=["print('hello world')"],
+                          labels={"foo": "bar"},
+                          name="passing-test1",
+                          task_id="passing-task1",
+                          get_logs=True,
+                          dag=dag
+                          )
 
 # failing1 = KubernetesPodOperator(namespace='default',
 #                           image="python:3.6",
@@ -49,27 +49,27 @@ passing3 = DummyOperator(task_id='passing3', dag=dag)
 #                           dag=dag
 #                           )
 
-# passing2 = KubernetesPodOperator(namespace='default',
-#                           image="python:3.6",
-#                           cmds=["python","-c"],
-#                           arguments=["print('hello world')"],
-#                           labels={"foo": "bar"},
-#                           name="passing-test2",
-#                           task_id="passing-task2",
-#                           get_logs=True,
-#                           dag=dag
-#                           )
+passing2 = KubernetesPodOperator(namespace='default',
+                          image="python:3.6",
+                          cmds=["python","-c"],
+                          arguments=["print('hello world')"],
+                          labels={"foo": "bar"},
+                          name="passing-test2",
+                          task_id="passing-task2",
+                          get_logs=True,
+                          dag=dag
+                          )
 
-# passing3 = KubernetesPodOperator(namespace='default',
-#                           image="python:3.6",
-#                           cmds=["python","-c"],
-#                           arguments=["print('hello world')"],
-#                           labels={"foo": "bar"},
-#                           name="passing-test3",
-#                           task_id="passing-task3",
-#                           get_logs=True,
-#                           dag=dag
-#                           )
+passing3 = KubernetesPodOperator(namespace='default',
+                          image="python:3.6",
+                          cmds=["python","-c"],
+                          arguments=["print('hello world')"],
+                          labels={"foo": "bar"},
+                          name="passing-test3",
+                          task_id="passing-task3",
+                          get_logs=True,
+                          dag=dag
+                          )
 
 # write_xcom1 = KubernetesPodOperator(
 #         namespace='default',
