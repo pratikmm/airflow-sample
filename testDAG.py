@@ -21,16 +21,22 @@ dag = DAG(
 
 start = DummyOperator(task_id='start', dag=dag)
 
-passing1 = KubernetesPodOperator(namespace='default',
-                          image="python:3.6",
-                          cmds=["python","-c"],
-                          arguments=["print('hello world')"],
-                          labels={"foo": "bar"},
-                          name="passing-test1",
-                          task_id="passing-task1",
-                          get_logs=True,
-                          dag=dag
-                          )
+passing1 = DummyOperator(task_id='passing1', dag=dag)
+
+passing2 = DummyOperator(task_id='passing2', dag=dag)
+
+passing3 = DummyOperator(task_id='passing3', dag=dag)
+
+# passing1 = KubernetesPodOperator(namespace='default',
+#                           image="python:3.6",
+#                           cmds=["python","-c"],
+#                           arguments=["print('hello world')"],
+#                           labels={"foo": "bar"},
+#                           name="passing-test1",
+#                           task_id="passing-task1",
+#                           get_logs=True,
+#                           dag=dag
+#                           )
 
 # failing1 = KubernetesPodOperator(namespace='default',
 #                           image="python:3.6",
@@ -92,11 +98,11 @@ end = DummyOperator(task_id='end', dag=dag)
 #[passing1, passing2, failing1] >> passing3
 
 
-#start >> passing1 >> end 
+start >> passing1 >> passing2 >> passing3 >> end 
 #passing2 >> passing3 >> write_xcom1 >> failing1 >> end
 
-passing1.set_upstream(start)
-passing1.set_downstream(end)
+#passing1.set_upstream(start)
+#passing1.set_downstream(end)
 # failing1.set_upstream(passing1)
 # passing2.set_upstream(passing1)
 # failing1.set_downstream(passing3)
