@@ -68,12 +68,12 @@ write_xcom = KubernetesPodOperator(
         namespace='default',
         image='alpine',
         cmds=["sh", "-c", "mkdir -p /airflow/xcom/;echo '[1,2,3,4]' > /airflow/xcom/return.json"],
+        labels={"foo": "bar"},
         name="write-xcom",
         do_xcom_push=True,
-        is_delete_operator_pod=True,
-        in_cluster=True,
         task_id="write-xcom",
         get_logs=True,
+        dag=dag
     )
 
 # pod_task_xcom_result = BashOperator(
