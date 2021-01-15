@@ -76,10 +76,10 @@ write_xcom = KubernetesPodOperator(
         get_logs=True,
     )
 
-pod_task_xcom_result = BashOperator(
-        bash_command="echo \"{{ task_instance.xcom_pull('write-xcom')[0] }}\"",
-        task_id="pod_task_xcom_result",
-    )
+# pod_task_xcom_result = BashOperator(
+#         bash_command="echo \"{{ task_instance.xcom_pull('write-xcom')[0] }}\"",
+#         task_id="pod_task_xcom_result",
+#     )
 
  
 end = DummyOperator(task_id='end', dag=dag)
@@ -91,5 +91,6 @@ passing2.set_upstream(passing)
 passing3.set_upstream(passing2)
 passing3.set_upstream(failing)
 write_xcom.set_upstream(passing3)
-pod_task_xcom_result.set_upstream(write_xcom)
-pod_task_xcom_result.set_downstream(end)
+write_xcom.set_downstream(end)
+# pod_task_xcom_result.set_upstream(write_xcom)
+# pod_task_xcom_result.set_downstream(end)
