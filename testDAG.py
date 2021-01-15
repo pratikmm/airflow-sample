@@ -71,17 +71,17 @@ passing3 = KubernetesPodOperator(namespace='default',
                           dag=dag
                           )
 
-# write_xcom1 = KubernetesPodOperator(
-#         namespace='default',
-#         image='alpine',
-#         cmds=["sh", "-c", "mkdir -p /airflow/xcom/;echo '[1,2,3,4]' > /airflow/xcom/return.json"],
-#         labels={"foo": "bar"},
-#         name="write-xcom1",
-#         do_xcom_push=True,
-#         task_id="write-xcom1",
-#         get_logs=True,
-#         dag=dag
-#     )
+write_xcom1 = KubernetesPodOperator(
+        namespace='default',
+        image='alpine',
+        cmds=["sh", "-c", "mkdir -p /airflow/xcom/;echo '[1,2,3,4]' > /airflow/xcom/return.json"],
+        labels={"foo": "bar"},
+        name="write-xcom1",
+        do_xcom_push=True,
+        task_id="write-xcom1",
+        get_logs=True,
+        dag=dag
+    )
 
 # pod_task_xcom_result = BashOperator(
 #         bash_command="echo \"{{ task_instance.xcom_pull('write-xcom')[0] }}\"",
@@ -98,7 +98,7 @@ end = DummyOperator(task_id='end', dag=dag)
 #[passing1, passing2, failing1] >> passing3
 
 
-start >> passing1 >> passing2 >> passing3 >> end 
+start >> passing1 >> passing2 >> passing3 >> write_xcom1 >>end 
 #passing2 >> passing3 >> write_xcom1 >> failing1 >> end
 
 #passing1.set_upstream(start)
