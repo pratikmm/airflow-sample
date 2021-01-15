@@ -2,6 +2,7 @@ from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.bash import BashOperator
 
 default_args = {
     'owner': 'airflow',
@@ -32,7 +33,7 @@ passing = KubernetesPodOperator(namespace='default',
                           )
 
 failing = KubernetesPodOperator(namespace='default',
-                          image="ubuntu:16.04",
+                          image="python:3.6",
                           cmds=["python","-c"],
                           arguments=["print('hello world')"],
                           labels={"foo": "bar"},
@@ -63,7 +64,24 @@ passing3 = KubernetesPodOperator(namespace='default',
                           get_logs=True,
                           dag=dag
                           )
+write_xcom = KubernetesPodOperator(
+        namespace='default',
+        image='alpine',
+        cmds=["sh", "-c", "mkdir -p /airflow/xcom/;echo '[1,2,3,4]' > /airflow/xcom/return.json"],
+        name="write-xcom",
+        do_xcom_push=True,
+        is_delete_operator_pod=True,
+        in_cluster=True,
+        task_id="write-xcom",
+        get_logs=True,
+    )
 
+pod_task_xcom_result = BashOperator(
+        bash_command="echo \"{{ task_instance.xcom_pull('write-xcom')[0] }}\"",
+        task_id="pod_task_xcom_result",
+    )
+
+ 
 end = DummyOperator(task_id='end', dag=dag)
 
 
@@ -72,4 +90,6 @@ failing.set_upstream(passing)
 passing2.set_upstream(passing)
 passing3.set_upstream(passing2)
 passing3.set_upstream(failing)
-passing3.set_downstream(end)
+write_xcom.set_upstream(passing3)
+pod_task_xcom_result.set_upstream(write_xcom)
+pod_task_xcom_result.set_downstream(end)
