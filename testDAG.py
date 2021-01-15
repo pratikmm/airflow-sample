@@ -21,24 +21,24 @@ dag = DAG(
 
 start = DummyOperator(task_id='start', dag=dag)
 
-passing = KubernetesPodOperator(namespace='default',
+passing1 = KubernetesPodOperator(namespace='default',
                           image="python:3.6",
                           cmds=["python","-c"],
                           arguments=["print('hello world')"],
                           labels={"foo": "bar"},
                           name="passing-test",
-                          task_id="passing-task",
+                          task_id="passing-task1",
                           get_logs=True,
                           dag=dag
                           )
 
-failing = KubernetesPodOperator(namespace='default',
+failing1 = KubernetesPodOperator(namespace='default',
                           image="python:3.6",
                           cmds=["python","-c"],
                           arguments=["print('hello world')"],
                           labels={"foo": "bar"},
                           name="fail",
-                          task_id="failing-task",
+                          task_id="failing-task1",
                           get_logs=True,
                           dag=dag
                           )
@@ -64,14 +64,14 @@ passing3 = KubernetesPodOperator(namespace='default',
                           get_logs=True,
                           dag=dag
                           )
-write_xcom = KubernetesPodOperator(
+write_xcom1 = KubernetesPodOperator(
         namespace='default',
         image='alpine',
         cmds=["sh", "-c", "mkdir -p /airflow/xcom/;echo '[1,2,3,4]' > /airflow/xcom/return.json"],
         labels={"foo": "bar"},
         name="write-xcom",
         do_xcom_push=True,
-        task_id="write-xcom",
+        task_id="write-xcom1",
         get_logs=True,
         dag=dag
     )
@@ -85,12 +85,12 @@ write_xcom = KubernetesPodOperator(
 end = DummyOperator(task_id='end', dag=dag)
 
 
-passing.set_upstream(start)
-failing.set_upstream(passing)
-passing2.set_upstream(passing)
-passing3.set_upstream(passing2)
-passing3.set_upstream(failing)
-write_xcom.set_upstream(passing3)
-write_xcom.set_downstream(end)
+passing1.set_upstream(start)
+failing1.set_upstream(passing1)
+passing2.set_upstream(passing1)
+passing3.set_downstream(passing2)
+passing3.set_downstream(failing1)
+write_xcom1.set_upstream(passing3)
+write_xcom1.set_downstream(end)
 # pod_task_xcom_result.set_upstream(write_xcom)
 # pod_task_xcom_result.set_downstream(end)
