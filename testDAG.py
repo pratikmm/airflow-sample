@@ -91,7 +91,7 @@ end = DummyOperator(task_id='end', dag=dag)
 #[passing1, passing2, failing1] >> passing3
 
 
-start >> passing1 >> passing2 >> passing3 >> write_xcom1 >> end
+start >> passing1 >> passing2 >> passing3 >> write_xcom1 >> failing1 >> end
 
 # passing1.set_upstream(start)
 # failing1.set_upstream(passing1)
