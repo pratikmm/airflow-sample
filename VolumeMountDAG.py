@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 volume_mount = VolumeMount('task-pv-claim',
                             mount_path='/root/mount_file',
                             sub_path=None,
-                            read_only=True)
+                            read_only=False)
 port = Port('http', 80)
 #configmaps = ['test-configmap-1', 'test-configmap-2']
 
