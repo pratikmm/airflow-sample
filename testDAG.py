@@ -66,8 +66,8 @@ passing3 = KubernetesPodOperator(namespace='default',
                           labels={"foo": "bar"},
                           name="passing-test3",
                           task_id="passing-task3",
-                          volume_mounts='/vmount',
-                          volumes ='task-pv-volume',
+                          volume_mounts=['/vmount'],
+                          volumes =['task-pv-volume'],
                           get_logs=True,
                           dag=dag
                           )
