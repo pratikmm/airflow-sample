@@ -83,6 +83,27 @@ write_xcom1 = KubernetesPodOperator(
         dag=dag
     )
 
+read_xcom = KubernetesPodOperator(namespace='default',
+                          image="python:3.6",
+                          cmds=["echo"],
+                          arguments=["$return_value"],
+                          labels={"foo": "bar"},
+                          name="read_xcom",
+                          task_id="read_xcom",
+                          get_logs=True,
+                          dag=dag
+                          )
+
+# another_kubernetes_task = KubernetesPodOperator(namespace="airflow",
+#                                                 name="anotherexampletask",
+#                                                 task_id="another_kubernetes_task",
+#                                                 image="docker_repo/another_example_image",
+#                                                 arguments=["--myarg",
+#   "{{ task_instance.xcom_pull(task_ids='example_kubernetes_task', key='return_value')['key1'] }}"
+#  ],
+#  ...
+# )
+
 # pod_task_xcom_result = BashOperator(
 #         bash_command="echo \"{{ task_instance.xcom_pull('write-xcom')[0] }}\"",
 #         task_id="pod_task_xcom_result",
@@ -98,7 +119,7 @@ end = DummyOperator(task_id='end', dag=dag)
 #[passing1, passing2, failing1] >> passing3
 
 
-start >> passing1 >> passing2 >> passing3 >> write_xcom1 >>end 
+start >> passing1 >> passing2 >> passing3 >> write_xcom1 >> read_xcom >>end 
 #passing2 >> passing3 >> write_xcom1 >> failing1 >> end
 
 #passing1.set_upstream(start)
