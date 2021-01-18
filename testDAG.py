@@ -2,6 +2,10 @@ from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.operators.dummy_operator import DummyOperator
+from airflow.contrib.kubernetes.secret import Secret
+from airflow.contrib.kubernetes.volume import Volume
+from airflow.contrib.kubernetes.volume_mount import VolumeMount
+from airflow.contrib.kubernetes.pod import Port
 #from airflow.operators.bash import BashOperator
 #from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
 #from airflow.utils.trigger_rule import TriggerRule
@@ -18,20 +22,20 @@ default_args = {
 }
 
 
-# volume_mount = VolumeMount('persist-disk',
-#                            mount_path='/files',
-#                            sub_path=None,
-#                            read_only=False)
+volume_mount = VolumeMount('test-pvc-claim',
+                            mount_path='/root/mount_file',
+                            sub_path=None,
+                            read_only=False)
+port = Port('http', 80)
+#configmaps = ['test-configmap-1', 'test-configmap-2']
 
-# volume_config= {
-#     'persistentVolumeClaim':
-#     {
-#         'claimName': 'task-pv-claim' # uses the persistentVolumeClaim given in the Kube yaml
-#     }
-# }
-
-# volume = Volume(name='persist-disk', configs=volume_config) # the name here is the literal name given to volume for the pods yaml.
-
+volume_config= {
+    'persistentVolumeClaim':
+      {
+        'claimName': 'test-pvc-claim'
+      }
+    }
+volume = Volume(name='test-pvc-claim', configs=volume_config)
 dag = DAG(
     'testDAG', default_args=default_args, schedule_interval=timedelta(minutes=10))
 
@@ -77,14 +81,28 @@ passing2 = KubernetesPodOperator(namespace='default',
                           dag=dag
                           )
 
-passing3 = KubernetesPodOperator(namespace='default',
+volumeWriter = KubernetesPodOperator(namespace='default',
                           image="python:3.6",
-                          cmds=["sh", "-c", "mkdir -p /vmount/airflow/xcom/;echo '[1,2,3,4]' > /vmount/airflow/xcom/return.json"],
+                          cmds=["sh", "-c", "mkdir -p /root/mount_file/airflow/xcom/;echo '[1,2,3,4]' > /root/mount_file/airflow/xcom/return.json"],
                           labels={"foo": "bar"},
-                          name="passing-test3",
-                          task_id="passing-task3",
-                          volumes = ['task-pv-claim'],
-                          volume_mounts = ['/vmount'],
+                          name="volumeWriter-test",
+                          task_id="volumeWriter-task",
+                          ports=[port],
+                          volumes=[volume],
+                          volume_mounts=[volume_mount],
+                          get_logs=True,
+                          dag=dag
+                          )
+
+volumeReader = KubernetesPodOperator(namespace='default',
+                          image="python:3.6",
+                          cmds=["cat", "/root/mount_file/airflow/xcom/return.json"],
+                          labels={"foo": "bar"},
+                          name="volumeReader-test",
+                          task_id="volumeReader-task",
+                          ports=[port],
+                          volumes=[volume],
+                          volume_mounts=[volume_mount],
                           get_logs=True,
                           dag=dag
                           )
@@ -136,7 +154,7 @@ end = DummyOperator(task_id='end', dag=dag)
 #[passing1, passing2, failing1] >> passing3
 
 
-start >> passing1 >> passing2 >> passing3 >> write_xcom1 >> read_xcom >>end 
+start >> passing1 >> passing2 >> volumeWriter >> write_xcom1 >> read_xcom >>end 
 #passing2 >> passing3 >> write_xcom1 >> failing1 >> end
 
 #passing1.set_upstream(start)
