@@ -132,7 +132,7 @@ read_xcom = KubernetesPodOperator(namespace='default',
 
 def pull_function(**kwargs):
     ti = kwargs['ti']
-    ls = ti.xcom_pull(task_ids='push_task')
+    ls = ti.xcom_pull(task_ids='write-xcom1')
     print(ls)
 
 pull_task = PythonOperator(
