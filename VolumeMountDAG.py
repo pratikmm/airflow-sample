@@ -96,7 +96,7 @@ default_args = {
 
 
 dag = DAG(
-    'testDAG', default_args=default_args, schedule_interval=timedelta(minutes=10))
+    'VolumeMountDAG', default_args=default_args, schedule_interval=timedelta(minutes=10))
 
 start = DummyOperator(task_id='start', dag=dag)
 
