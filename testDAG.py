@@ -85,7 +85,7 @@ volumeWriter = KubernetesPodOperator(namespace='default',
                           image="python:3.6",
                           cmds=["sh", "-c", "mkdir -p /root/mount_file/airflow/xcom/;echo '[1,2,3,4]' > /root/mount_file/airflow/xcom/return.json"],
                           labels={"foo": "bar"},
-                          name="volumeWriter-test",
+                          name="volumeWriter-task",
                           task_id="volumeWriter-task",
                           ports=[port],
                           volumes=[volume],
@@ -98,7 +98,7 @@ volumeReader = KubernetesPodOperator(namespace='default',
                           image="python:3.6",
                           cmds=["cat", "/root/mount_file/airflow/xcom/return.json"],
                           labels={"foo": "bar"},
-                          name="volumeReader-test",
+                          name="volumeReader-task",
                           task_id="volumeReader-task",
                           ports=[port],
                           volumes=[volume],
@@ -154,7 +154,7 @@ end = DummyOperator(task_id='end', dag=dag)
 #[passing1, passing2, failing1] >> passing3
 
 
-start >> passing1 >> passing2 >> volumeWriter >> write_xcom1 >> read_xcom >>end 
+start >> passing1 >> passing2 >> volumeWriter >> volumeReader >> write_xcom1 >> read_xcom >> end 
 #passing2 >> passing3 >> write_xcom1 >> failing1 >> end
 
 #passing1.set_upstream(start)
