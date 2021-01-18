@@ -62,11 +62,12 @@ passing2 = KubernetesPodOperator(namespace='default',
 
 passing3 = KubernetesPodOperator(namespace='default',
                           image="python:3.6",
-                          cmds=["python","-c"],
-                          arguments=["print('hello world')"],
+                          cmds=["sh", "-c", "mkdir -p /vmount/airflow/xcom/;echo '[1,2,3,4]' > /vmount/airflow/xcom/return.json"],
                           labels={"foo": "bar"},
                           name="passing-test3",
                           task_id="passing-task3",
+                          volume_mounts='/vmount',
+                          volumes ='task-pv-volume',
                           get_logs=True,
                           dag=dag
                           )
