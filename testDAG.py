@@ -85,8 +85,7 @@ write_xcom1 = KubernetesPodOperator(
 
 read_xcom = KubernetesPodOperator(namespace='default',
                           image="python:3.6",
-                          cmds=["echo"],
-                          arguments=["$return_value"],
+                          cmds=["printenv"],
                           labels={"foo": "bar"},
                           name="read_xcom",
                           task_id="read_xcom",
