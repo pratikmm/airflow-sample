@@ -6,6 +6,7 @@ from airflow.contrib.kubernetes.secret import Secret
 from airflow.contrib.kubernetes.volume import Volume
 from airflow.contrib.kubernetes.volume_mount import VolumeMount
 from airflow.contrib.kubernetes.pod import Port
+from airflow.operators.python_operator import PythonOperator
 #from airflow.operators.bash import BashOperator
 #from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
 #from airflow.utils.trigger_rule import TriggerRule
@@ -129,6 +130,17 @@ read_xcom = KubernetesPodOperator(namespace='default',
                           dag=dag
                           )
 
+def pull_function(**kwargs):
+    ti = kwargs['ti']
+    ls = ti.xcom_pull(task_ids='push_task')
+    print(ls)
+
+pull_task = PythonOperator(
+    task_id='pull_task', 
+    python_callable=pull_function,
+    provide_context=True,
+    dag=dag)
+
 # another_kubernetes_task = KubernetesPodOperator(namespace="airflow",
 #                                                 name="anotherexampletask",
 #                                                 task_id="another_kubernetes_task",
@@ -154,7 +166,7 @@ end = DummyOperator(task_id='end', dag=dag)
 #[passing1, passing2, failing1] >> passing3
 
 
-start >> passing1 >> passing2 >> volumeWriter >> volumeReader >> write_xcom1 >> read_xcom >> end 
+start >> passing1 >> passing2 >> volumeWriter >> volumeReader >> write_xcom1 >> pull_task >> read_xcom >> end 
 #passing2 >> passing3 >> write_xcom1 >> failing1 >> end
 
 #passing1.set_upstream(start)
