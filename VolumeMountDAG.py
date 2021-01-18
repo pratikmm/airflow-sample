@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 #secret_file = Secret('volume', '/etc/sql_conn', 'airflow-secrets', 'sql_alchemy_conn')
 #secret_env  = Secret('env', 'SQL_CONN', 'airflow-secrets', 'sql_alchemy_conn')
 #secret_all_keys  = Secret('env', None, 'airflow-secrets-2')
-volume_mount = VolumeMount('task-pv-claim',
+volume_mount = VolumeMount('test-pvc-claim',
                             mount_path='/root/mount_file',
                             sub_path=None,
                             read_only=False)
@@ -21,10 +21,10 @@ port = Port('http', 80)
 volume_config= {
     'persistentVolumeClaim':
       {
-        'claimName': 'task-pv-claim'
+        'claimName': 'test-pvc-claim'
       }
     }
-volume = Volume(name='task-pv-claim', configs=volume_config)
+volume = Volume(name='test-pvc-claim', configs=volume_config)
 
 # affinity = {
 #     'nodeAffinity': {
