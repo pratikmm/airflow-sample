@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.operators.dummy_operator import DummyOperator
 #from airflow.operators.bash import BashOperator
+from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
+from airflow.utils.trigger_rule import TriggerRule
 
 default_args = {
     'owner': 'airflow',
@@ -14,6 +16,21 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=5)
 }
+
+
+volume_mount = VolumeMount('persist-disk',
+                           mount_path='/files',
+                           sub_path=None,
+                           read_only=False)
+
+volume_config= {
+    'persistentVolumeClaim':
+    {
+        'claimName': 'task-pv-claim' # uses the persistentVolumeClaim given in the Kube yaml
+    }
+}
+
+volume = Volume(name='persist-disk', configs=volume_config) # the name here is the literal name given to volume for the pods yaml.
 
 dag = DAG(
     'testDAG', default_args=default_args, schedule_interval=timedelta(minutes=10))
@@ -66,8 +83,8 @@ passing3 = KubernetesPodOperator(namespace='default',
                           labels={"foo": "bar"},
                           name="passing-test3",
                           task_id="passing-task3",
-                          volume_mounts=['/vmount'],
-                          volumes =['task-pv-volume'],
+                          volumes = [volume],
+                          volume_mounts = [volume_mount],
                           get_logs=True,
                           dag=dag
                           )
